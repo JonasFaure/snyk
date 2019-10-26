@@ -52,15 +52,16 @@ before('prime config', async (t) => {
   }
 });
 
-test('cli tests for online repos', async (t) => {
+test('cli tests for online repo semver@2', async (t) => {
+  // t.plan(4);
   try {
     const res = await cli.test('semver@2');
     t.fail(res);
   } catch (error) {
     const res = error.message;
     const pos = res.toLowerCase().indexOf('vulnerability found');
-    t.pass(res);
-    t.notEqual(pos, -1, 'correctly found vulnerability: ' + res);
+    t.true(res, 'have res');
+    t.notEqual(pos, -1, 'correctly found a vulnerability in semver@2');
   }
 
   try {
@@ -68,17 +69,25 @@ test('cli tests for online repos', async (t) => {
     t.fail(res);
   } catch (error) {
     const res = JSON.parse(error.message);
+    // console.log(res);
+    t.true(res, 'have res');
     const vuln = res.vulnerabilities[0];
-    t.pass(vuln.title);
+    t.equal(
+      vuln.title,
+      'semver Regular Expression Denial of Service',
+      'vuln title present',
+    );
+    t.equal(res.packageManager, 'npm', 'correct package manager');
     t.equal(
       vuln.id,
       'npm:semver:20150403',
-      'correctly found vulnerability: ' + vuln.id,
+      'correctly found a vulnerability in semver@2 with --json',
     );
   }
 });
 
 test('multiple test arguments', async (t) => {
+  t.plan(4);
   try {
     const res = await cli.test('semver@4', 'qs@6');
     const lastLine = res
@@ -143,62 +152,62 @@ test('multiple test arguments', async (t) => {
   }
 });
 
-test('test for existing remote package with dev-deps only with --dev', async (t) => {
-  try {
-    const res = await cli.test('lodash@4.17.11', { dev: true });
-    const lastLine = res
-      .trim()
-      .split('\n')
-      .pop();
-    t.deepEqual(
-      lastLine,
-      '✓ Tested lodash@4.17.11 for known vulnerabilities, no vulnerable paths found.',
-      'successfully tested lodash@4.17.11',
-    );
-  } catch (error) {
-    t.fail('should not throw, instead received error: ' + error);
-  }
-});
+// test('test for existing remote package with dev-deps only with --dev', async (t) => {
+//   try {
+//     const res = await cli.test('lodash@4.17.11', { dev: true });
+//     const lastLine = res
+//       .trim()
+//       .split('\n')
+//       .pop();
+//     t.deepEqual(
+//       lastLine,
+//       '✓ Tested lodash@4.17.11 for known vulnerabilities, no vulnerable paths found.',
+//       'successfully tested lodash@4.17.11',
+//     );
+//   } catch (error) {
+//     t.fail('should not throw, instead received error: ' + error);
+//   }
+// });
 
-test('test for existing remote package with dev-deps only', async (t) => {
-  try {
-    const ciCheckerStub = sinon.stub(ciChecker, 'isCI');
-    ciCheckerStub.returns(false);
-    t.teardown(ciCheckerStub.restore);
+// test('test for existing remote package with dev-deps only', async (t) => {
+//   try {
+//     const ciCheckerStub = sinon.stub(ciChecker, 'isCI');
+//     ciCheckerStub.returns(false);
+//     t.teardown(ciCheckerStub.restore);
 
-    const res = await cli.test('lodash@4.17.11', { dev: false });
-    const lastLine = res
-      .trim()
-      .split('\n')
-      .pop();
+//     const res = await cli.test('lodash@4.17.11', { dev: false });
+//     const lastLine = res
+//       .trim()
+//       .split('\n')
+//       .pop();
 
-    t.deepEqual(
-      lastLine,
-      'Tip: Snyk only tests production dependencies by default. You can try re-running with the `--dev` flag.',
-      'tip text as expected',
-    );
-  } catch (error) {
-    t.fail('should not throw, instead received error: ' + error);
-  }
-});
+//     t.deepEqual(
+//       lastLine,
+//       'Tip: Snyk only tests production dependencies by default. You can try re-running with the `--dev` flag.',
+//       'tip text as expected',
+//     );
+//   } catch (error) {
+//     t.fail('should not throw, instead received error: ' + error);
+//   }
+// });
 
-test('test for non-existing', async (t) => {
-  try {
-    const res = await cli.test('@123');
-    t.fails('should fail, instead received ' + res);
-  } catch (error) {
-    const res = error.message;
-    const lastLine = res
-      .trim()
-      .split('\n')
-      .pop();
-    t.deepEqual(
-      lastLine,
-      'Internal server error',
-      'expected error: Internal server error',
-    );
-  }
-});
+// test('test for non-existing', async (t) => {
+//   try {
+//     const res = await cli.test('@123');
+//     t.fails('should fail, instead received ' + res);
+//   } catch (error) {
+//     const res = error.message;
+//     const lastLine = res
+//       .trim()
+//       .split('\n')
+//       .pop();
+//     t.deepEqual(
+//       lastLine,
+//       'Internal server error',
+//       'expected error: Internal server error',
+//     );
+//   }
+// });
 
 after('teardown', async (t) => {
   delete process.env.SNYK_API;
