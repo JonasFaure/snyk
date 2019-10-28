@@ -55,8 +55,6 @@
     "@snyk/dep-graph": "1.12.0",
     "@snyk/gemfile": "1.2.0",
     "@snyk/snyk-cocoapods-plugin": "1.0.3",
-    "@types/agent-base": "^4.2.0",
-    "@types/restify": "^4.3.6",
     "abbrev": "^1.1.1",
     "ansi-escapes": "3.2.0",
     "chalk": "^2.4.2",
@@ -99,6 +97,8 @@
     "wrap-ansi": "^5.1.0"
   },
   "devDependencies": {
+    "@types/agent-base": "^4.2.0",
+    "@types/restify": "^4.3.6",
     "@types/chalk": "^2.2.0",
     "@types/diff": "^3.5.2",
     "@types/lodash": "^4.14.136",
